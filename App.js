@@ -1,11 +1,30 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { AppLoading, Asset } from 'expo';
+
+import Discovery from './components/discovery';
+import { stories } from './common/constants';
 
 export default class App extends React.Component {
+  state = {
+    isReady: false
+  }
+
+  async componentDidMount() {
+    const promises = stories.map(s => Promise.all([
+      Asset.loadAsync(s.source),
+      s.video ? Asset.loadAsync(s.video) : undefined,
+    ]));
+    await Promise.all(promises)
+    this.setState({ isReady: true });
+  }
+  
   render() {
+    if (!this.state.isReady) return <AppLoading />
+
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
+        <Discovery />
       </View>
     );
   }
@@ -16,6 +35,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
 });
